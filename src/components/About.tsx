@@ -1,3 +1,4 @@
+
 import pic1 from "../assets/pic1.png";
 
 const About = () => {
@@ -18,6 +19,7 @@ const About = () => {
     </div>
     <div></div>
     <div className=" lg:w-full">
+      
       <img src={pic1} alt="Group Image " className="object-cover h-60" />
     </div>
   </div>
