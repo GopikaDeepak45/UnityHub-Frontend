@@ -1,8 +1,13 @@
 
+import { useGetLandingPageQuery } from "@/redux/apiSlices/landingPageSlice";
 import pic1 from "../assets/pic1.png";
 
 const About = () => {
+  const { data: landingPageData, } = useGetLandingPageQuery(undefined);
   return (
+    <div className="container mx-auto flex-1 py-10">
+
+    
     <div className="flex flex-wrap gap-4 lg:flex-nowrap">
     <div id="about">
       <h1 className="text-4xl font-bold  text-black-600 mb-7">About Us</h1>
@@ -20,8 +25,9 @@ const About = () => {
     <div></div>
     <div className=" lg:w-full">
       
-      <img src={pic1} alt="Group Image " className="object-cover h-60" />
+      <img src={landingPageData?.about?landingPageData.about.image.url:pic1} alt="Group Image " className="object-cover h-60" />
     </div>
+  </div>
   </div>
   )
 }

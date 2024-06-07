@@ -32,6 +32,13 @@ interface LinkData {
       route: "/api/admin/packages",
     },
     {
+      title: "Core Packagesdddd",
+      label: "",
+      icon: PackageCheck,
+      variant: "ghost",
+      route: "/api/admin/corePackages",
+    },
+    {
       title: "All Images",
       label: "",
       icon: Images,

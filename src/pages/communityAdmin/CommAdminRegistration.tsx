@@ -40,7 +40,7 @@ const formSchema = z.object({
           "Password must include at least one digit, one special character, and one uppercase letter.",
       }
     ),
-  conformPassword: z
+  confirmPassword: z
     .string()
     .min(8, {
       message: "Password must be at least 8 characters.",
@@ -58,7 +58,7 @@ const formSchema = z.object({
           "Password must include at least one digit, one special character, and one uppercase letter.",
       }
     ),
-  mobileNo: z.string().trim().max(10, { message: "Mobile number must be a 10-digit number." }),
+  mobileNo: z.string().trim().min(1, { message: " Cannot be empty" }).max(10, { message: "Mobile number must be a 10-digit number." }),
   communityName: z.string().trim().min(1, { message: "Community Name cannot be empty" }).max(50, { message: "Community name must be at most 50 characters." }).refine(value => !!value, { message: "Community name cannot be empty." }),
   communityLocation: z.string().trim().min(1, { message: "Community location cannot be empty" }).max(50, { message: "Community location must be at most 50 characters." }).refine(value => !!value, { message: "Community location cannot be empty." }),
 });
@@ -78,7 +78,7 @@ const CommAdminRegistration: React.FC = () => {
       name: "",
       email: "",
       password: "",
-      conformPassword: "",
+      confirmPassword: "",
       mobileNo: "",
       communityName: "",
       communityLocation: "",
@@ -225,10 +225,10 @@ const CommAdminRegistration: React.FC = () => {
           />
           <FormField
             control={form.control}
-            name="conformPassword"
+            name="confirmPassword"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Conform Password</FormLabel>
+                <FormLabel>Confirm Password</FormLabel>
                 <FormControl>
                   <Input type="password" placeholder="********" {...field} />
                 </FormControl>

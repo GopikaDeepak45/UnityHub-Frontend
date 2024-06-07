@@ -47,7 +47,7 @@ interface LinkData {
   useEffect(() => {
     const handleResize = () => {
       // Check the screen width and set isCollapsed accordingly
-      if (window.innerWidth < 768) { // Adjust this value according to your requirements
+      if (window.innerWidth < 1224) { // Adjust this value according to your requirements
         setIsCollapsed(true);
       } else {
         setIsCollapsed(false);
@@ -69,7 +69,7 @@ interface LinkData {
   return (
     <div className="relative min-w-[80px] border-r px-3 pb-10 pt-24">
         <div className="absolute right-[-20px] top-7">
-        <Button onClick={toggleCollapse} variant={"secondary"} className="rounded-full p-2 invisible md:visible">
+        <Button onClick={toggleCollapse} variant={"secondary"} className="rounded-full p-2 invisible lg:visible">
            {isCollapsed? <ChevronRight/>:
             <ChevronLeft/>}
         </Button>
@@ -80,7 +80,7 @@ interface LinkData {
        
       />
 
-      <Button className=" text-black bg-secondary hover:bg-slate-200 mt-20" onClick={logOutHandler}>
+      <Button className=" text-black bg-secondary hover:bg-slate-200 mx-auto" onClick={logOutHandler}>
        <Link to='/'>Logout</Link>
       </Button>
     </div>

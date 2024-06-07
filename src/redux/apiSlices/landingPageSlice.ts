@@ -10,9 +10,16 @@ export const landingPageApi = apiSlice.injectEndpoints({
         method: "GET",
       }),
     }),
+    sendMessage: builder.mutation({
+      query: data => ({
+        url: `/contact`,
+        method: "POST",
+        body:{...data}
+      }),
+    }),
     
   }),
 });
 
 // Extract generated hooks for each endpoint
-export const {useGetLandingPageQuery} = landingPageApi;
+export const {useGetLandingPageQuery,useSendMessageMutation} = landingPageApi;

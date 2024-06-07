@@ -1,31 +1,17 @@
+import { useGetLandingPageQuery } from "@/redux/apiSlices/landingPageSlice";
 import hands from "../assets/hands.png";
-import { Button } from "./ui/button";
+// import { Button } from "./ui/button";
 
 const Hero = () => {
-  
-  // const landingpagedata = {
-  //   hero: "" // Example of defining 'hero' property
-  // };
-
-
+  const { data: landingPageData, } = useGetLandingPageQuery(undefined);
   return (
     <div className="relative">
       <img
-        src={hands}
+        src={landingPageData?.hero?landingPageData.hero.url:hands}
         className="w-full max-h-[600px] object-cover"
         alt="Hands"
       />
-{/* 
-{landingpagedata?(<img
-        src={landingpagedata.hero}
-        className="w-full max-h-[600px] object-cover"
-        alt="Hands"
-      />):(<img
-        src={hands}
-        className="w-full max-h-[600px] object-cover"
-        alt="Hands"
-      />)}
-       */}
+
       <div className="absolute inset-0 bg-customGreen opacity-50"></div>
 
       <div className="absolute inset-0 flex  items-center pl-20 ">
@@ -42,7 +28,7 @@ const Hero = () => {
             </span>
           </div>
 
-          <Button> Join Now</Button>
+          {/* <Button> Join Now</Button> */}
         </div>
       </div>
     </div>

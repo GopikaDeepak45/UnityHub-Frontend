@@ -37,7 +37,6 @@ import { useGetLandingPageQuery } from "@/redux/apiSlices/landingPageSlice";
 import CustomAlertButton from "@/components/CustomAlert";
 import Overlay from "@/components/OverLay";
 
-
 const formSchema = z.object({
   imageType: z.enum(['hero', 'about', 'common']), // Define image type schema
   imageUrl: z.string(), // Validate that imageUrl is a valid URL
@@ -59,9 +58,11 @@ const AdminImages = () => {
   });
   //****************api hooks************
   const { data: landingPageData, error: landingPageError, isLoading: landingPageLoading,refetch } = useGetLandingPageQuery(undefined);
+
   const [addImage] = useAddImageMutation()
   const [deleteImage] = useDeleteImageMutation()
 
+  
   
   const [loading, setLoading] = useState(true);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -70,6 +71,9 @@ const AdminImages = () => {
   //for add image modal
   const [showAddImageModal, setShowAddImageModal] = useState(true);
 
+  const handleShowAddImageModal = () => {
+    setShowAddImageModal(true);
+  };
 
   useEffect(() => {
     // Update the state when landing page data is fetched successfully
@@ -87,9 +91,12 @@ const AdminImages = () => {
   };
   const deleteImageHandler = async (imageType: string, imageUrl: string,publicId:string) => {
     try {
-      deleteImage({ imageType, imageUrl,publicId })
+      await deleteImage({ imageType, imageUrl,publicId })
+      refetch()
      // window.location.reload();
+    
      refetch()
+     
      
     } catch (e) {
 
@@ -125,8 +132,8 @@ const AdminImages = () => {
       await addImage(formDataWithImageUrl);
       // Reset the form after successful submission
       refetch()
-      form.reset();
       setShowAddImageModal(false)
+      form.reset();
       //window.location.reload()
 
     } catch (error) {
@@ -137,22 +144,14 @@ const AdminImages = () => {
     }
   };
 
-  if (landingPageError) {
-    return <div className=" flex  justify-center text-4xl ">Something went wrong!...</div>;
-  }
-  if (loading) {
-    return <div className=" flex  justify-center ">Loading...</div>;
-  }
-
-  return (
-    <div className="ml-10">
-      <h1 className="text-2xl font-semibold m-10">Images</h1>
-      {/* Add new image portion, form also*/}
-
-      <div className="border border-green-800  p-2 rounded-md min-w-36 max-w-48 text-center">
+  if (!landingPageData) {
+    return <>
+    <div className="flex justify-center text-4xl">No data available...
+    </div>
+    <div className="border border-green-800  p-2 rounded-md min-w-36 max-w-48 text-center">
 
         <AlertDialog >
-          <AlertDialogTrigger >Add New Image</AlertDialogTrigger>
+          <AlertDialogTrigger onClick={handleShowAddImageModal}>Add New Image</AlertDialogTrigger>
           {showAddImageModal&&(
           <AlertDialogContent>
             <MyCard title="Login" description="" footer="">
@@ -178,10 +177,110 @@ const AdminImages = () => {
                         <FormControl>
                           <select
                             {...field}
+                            value={field.value}
                             className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
 
                           >
-                            <option value="hero" selected>Hero Image</option>
+                            <option value="hero" >Hero Image</option>
+                            <option value="about">About Image</option>
+                            <option value="common">
+                              Common Images
+                            </option>
+                          </select>
+                        </FormControl>
+                        <FormDescription></FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="imageUrl"
+                    render={() => (
+                      <FormItem>
+                        <FormLabel>Image URL</FormLabel>
+                        <FormControl>
+                          <Input type="file" onChange={handleFileChange} accept="image/*" />
+                        </FormControl>
+
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="flex justify-around">
+                    {!form.formState.isSubmitting&&(
+                       <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    )}
+                   
+
+                    <Button
+                      type="submit"
+                      disabled={form.formState.isSubmitting}
+                      variant={"bg1"}
+                    >
+                      {form.formState.isSubmitting?
+                      //   ?<svg className="animate-spin h-5 w-5 mr-3 ..." viewBox="0 0 24 24">
+                        
+                      // </svg>
+                      "Loading..." : "Submit"}
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </MyCard>
+          </AlertDialogContent>
+          )}
+        </AlertDialog>
+
+      </div>
+    </>;
+  }
+  if (landingPageError) {
+    return <div className=" flex  justify-center text-4xl ">Something went wrong!...</div>;
+  }
+  if (loading) {
+    return <div className=" flex  justify-center text-3xl">Loading...</div>;
+  }
+  return (
+    <div className="ml-10">
+      <h1 className="text-2xl font-semibold m-10">Images</h1>
+      {/* Add new image portion, form also*/}
+
+      <div className="border border-green-800  p-2 rounded-md min-w-36 max-w-48 text-center">
+
+        <AlertDialog >
+          <AlertDialogTrigger onClick={handleShowAddImageModal}>Add New Image</AlertDialogTrigger>
+          {showAddImageModal&&(
+          <AlertDialogContent>
+            <MyCard title="Login" description="" footer="">
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-8"
+
+                >
+                  {form.formState.errors.root && (
+                    <FormItem>
+                      <FormLabel className="text-destructive">
+                        Error adding new image
+                      </FormLabel>
+                    </FormItem>
+                  )}
+                  <FormField
+                    control={form.control}
+                    name="imageType"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Image Type</FormLabel>
+                        <FormControl>
+                          <select
+                            {...field}
+                            value={field.value}
+                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+
+                          >
+                            <option value="hero" >Hero Image</option>
                             <option value="about">About Image</option>
                             <option value="common">
                               Common Images

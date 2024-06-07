@@ -74,11 +74,36 @@ const CommAdminLogin:React.FC = () => {
   
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      const { accessToken } = await login({  email:values.email, password:values.password,role:'commAdmin'}).unwrap()
-            dispatch(setCredentials({ accessToken }))
+      const res:any = await login({  email:values.email, password:values.password,role:'commAdmin'}).unwrap()
+      
+      if (res.error?.message) {
+        form.setError("root", {
+          message: res.error.message
+        });
+      }
+      
+     else if (res.error?.data) {
+        
+        if (res.error.data.message) {
+          console.log(res.error.data.message)
+          form.setError("root", {
+            message: res.error.data.message
+          });
+          
+        }else{
+          form.setError("root", {
+            message: res.error.data
+          });
+      }
+      }else{
+      
+      const{accessToken}=res
+      dispatch(setCredentials({ accessToken }))
             
       navigate("/api/comm-admin");
+      }
     } catch (e) {
+      console.log('errorrr',e)
       form.setError("root", {
         message: "Incorrect email or password",
       });
@@ -94,7 +119,7 @@ const CommAdminLogin:React.FC = () => {
           {form.formState.errors.root && (
             <FormItem>
               <FormLabel className="text-destructive">
-                Incorrect email or password
+              {form.formState.errors.root.message}
               </FormLabel>
             </FormItem>
           )}

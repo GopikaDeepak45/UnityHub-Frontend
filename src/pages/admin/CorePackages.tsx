@@ -45,9 +45,7 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 const CorePackages = () => {
-  
-  const { data: landingPageData, error: landingPageError, isLoading: landingPageLoading,refetch } = useGetLandingPageQuery(undefined);
-
+ 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues:{
@@ -57,12 +55,23 @@ const CorePackages = () => {
       shortDescription:""
     }   
   });
+
+  //****************api hooks************ 
+  const { data: landingPageData, error: landingPageError, isLoading: landingPageLoading,refetch } = useGetLandingPageQuery(undefined);
   const [addCorePackge]=useAddCorePackageMutation()
+
+  const [loading, setLoading] = useState(true);
+  const [showAddModal, setShowAddModal] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  
 
   //for image file data
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [loading, setLoading] = useState(true);
-
+ 
+  //to manage modal display
+  const handleShowAddModal = () => {
+    setShowAddModal(true);
+  };
   //to take file input
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -71,7 +80,6 @@ const CorePackages = () => {
     }
   };
   const onSubmit = async (values: FormData) => {
-    console.log('onsubmit called',values)
     try {
       if (!selectedFile) {
         throw new Error('Please select an image');
@@ -94,11 +102,27 @@ const CorePackages = () => {
         imageUrl: url,
       publicId: publicId,
       };// Make a request to the backend with the form data
-      console.log('with img',formDataWithImageUrl)
-      await addCorePackge (formDataWithImageUrl);
+      const res:any=await addCorePackge (formDataWithImageUrl);
       // Reset the form after successful submission
-      refetch()
+      if (res.error?.data) {
+        
+        if (res.error.data.message) {
+          form.setError("root", {
+            message: res.error.data.message
+          });
+          
+        }else{
+          form.setError("root", {
+            message: res.error.data
+          });
+      }
+      }else{
+        refetch()
+      setShowAddModal(false)
       form.reset();
+
+      }
+      
     } catch (error) {
       console.error("Error submitting form:", error);
       form.setError("root", {
@@ -113,30 +137,17 @@ const CorePackages = () => {
       setLoading(false);
     }
   }, [landingPageData, landingPageLoading, landingPageError]);
-  if (landingPageError) {
-    return <div className=" flex  justify-center text-4xl "> Something went wrong!..</div>;
-  }
-  if (loading) {
-    return <div className=" flex  justify-center ">Loading...</div>;
-  }
 
-  return (
-    <div className="ml-10">
-      <h1 className="text-2xl font-semibold m-10">Core Packages</h1>
-      <div className="flex justify-between">
-        <div className="flex items-center space-x-2">
-          <Input
-            type="text"
-            className="px-3 py-2 w-80"
-            placeholder="Search..."
-          />
-         
-        </div>
-        <div>
-        <div className="border border-green-800  p-2 rounded-md min-w-36 max-w-48 text-center">
 
-            <AlertDialog>
-              <AlertDialogTrigger>Add New Package</AlertDialogTrigger>
+  if (!landingPageData) {
+    return <>
+    <div className="flex justify-center text-4xl">No data available...
+    </div>
+    <div className="border border-green-800  p-2 rounded-md min-w-36 max-w-48 text-center">
+
+    <AlertDialog>
+              <AlertDialogTrigger onClick={handleShowAddModal}>Add New Package</AlertDialogTrigger>
+              {showAddModal&&(
               <AlertDialogContent>
                 <MyCard title="" description="" footer="">
                   <Form {...form}>
@@ -147,7 +158,7 @@ const CorePackages = () => {
                       {form.formState.errors.root && (
                         <FormItem>
                           <FormLabel className="text-destructive">
-                            Error adding new Package
+                          {form.formState.errors.root.message}
                           </FormLabel>
                         </FormItem>
                       )}
@@ -214,6 +225,120 @@ const CorePackages = () => {
                   </Form>
                 </MyCard>
               </AlertDialogContent>
+              )}
+            </AlertDialog>
+
+      </div>
+    </>;
+  }
+  if (landingPageError) {
+    return <div className=" flex  justify-center text-4xl "> Something went wrong!..</div>;
+  }
+  if (loading) {
+    return <div className=" flex  justify-center ">Loading...</div>;
+  }
+  const filteredPackages = landingPageData?.corePackage.filter((item: { name: string, shortDescription: string }) => 
+    item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    item.shortDescription.toLowerCase().includes(searchQuery.toLowerCase())
+  ) || [];
+  return (
+    <div className="ml-10">
+      <h1 className="text-2xl font-semibold m-10">Core Packages</h1>
+      <div className="flex justify-between">
+        <div className="flex items-center space-x-2">
+          <Input
+            type="text"
+            className="px-3 py-2 w-80"
+            placeholder="Search..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+         
+        </div>
+        <div>
+        <div className="border border-green-800  p-2 rounded-md min-w-36 max-w-48 text-center">
+
+            <AlertDialog>
+              <AlertDialogTrigger onClick={handleShowAddModal}>Add New Package</AlertDialogTrigger>
+              {showAddModal&&(
+              <AlertDialogContent>
+                <MyCard title="" description="" footer="">
+                  <Form {...form}>
+                    <form
+                      onSubmit={form.handleSubmit(onSubmit)}
+                      className="space-y-8"
+                    >
+                      {form.formState.errors.root && (
+                        <FormItem>
+                          <FormLabel className="text-destructive">
+                          {form.formState.errors.root.message}
+                          </FormLabel>
+                        </FormItem>
+                      )}
+                      <FormField
+                        control={form.control}
+                        name="name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Package Name</FormLabel>
+                            <FormControl>
+                              <Input type="text" {...field}/>
+                              
+                            </FormControl>
+                            <FormDescription></FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="imageUrl"
+                        render={() => (
+                          <FormItem>
+                            <FormLabel>Image URL</FormLabel>
+                            <FormControl>
+                              <Input type="file" onChange={handleFileChange} accept="image/*"  />
+                            </FormControl>
+
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="shortDescription"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Description</FormLabel>
+                            <FormControl>
+                              <Input type="text" {...field}/>
+                              
+                            </FormControl>
+                            <FormDescription></FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <div className="flex justify-around">
+                      {!form.formState.isSubmitting&&(
+                       <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    )}
+                        <Button
+                          type="submit"
+                          disabled={form.formState.isSubmitting}
+                          variant={"bg1"}
+                        >
+                          {form.formState.isSubmitting
+                            ? "Loading..."
+                            : "Submit"}
+                        </Button>
+                      </div>
+                    </form>
+                  </Form>
+                </MyCard>
+              </AlertDialogContent>
+              )}
             </AlertDialog>
           </div>
         </div>
@@ -230,7 +355,7 @@ const CorePackages = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {landingPageData?.corePackage.map((item:{name:string,image:{url:string,publicId:string},shortDescription:string}, index:number) => (
+          {filteredPackages.map((item:{name:string,image:{url:string,publicId:string},shortDescription:string}, index:number) => (
             <TableRow key={index}>
               <TableCell className="font-medium">{index + 1}</TableCell>
               <TableCell>{item.name}</TableCell>

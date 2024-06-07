@@ -13,8 +13,8 @@ const Footer = () => {
           UnityHub
         </span>
         <span className="text-black font-bold tracking-tight flex gap-4 ">
-          <span>HHHHH</span>
-          <span>HHHHH</span>
+          <span>© 2024 UnityHub. All Rights Reserved.</span>
+          {/* <span>HHHHH</span> */}
         </span>
       </div>
     </div>

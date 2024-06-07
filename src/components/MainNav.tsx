@@ -1,5 +1,5 @@
 import { buttonVariants } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   HoverCard,
   HoverCardContent,
@@ -10,7 +10,18 @@ import useAuth from "@/hooks/useAuth";
 const MainNav = () => {
    
   //select type of user using useAuth custom 
-  const { username } = useAuth()
+  const { username,role } = useAuth()
+  const navigate = useNavigate();
+
+  const handleNameClick=()=>{
+    if(role==='admin'){
+      navigate('/api/admin')
+      
+    }
+    if(role === 'commAdmin'){
+      navigate('/api/comm-admin')
+    }
+  }
   return (
     <div className=" w-full flex justify-between items-center ">
       <div className="flex gap-10">
@@ -26,7 +37,7 @@ const MainNav = () => {
       </div>
 
       <div className="flex gap-3 items-center">
-{username?(<h2>{username}</h2>):(<>
+{username?(<h2 className="cursor-pointer font-bold" onClick={handleNameClick}>{username}</h2>):(<>
   <HoverCard>
           <HoverCardTrigger
             className={`${buttonVariants({
