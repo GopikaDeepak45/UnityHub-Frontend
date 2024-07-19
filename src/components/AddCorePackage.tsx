@@ -23,6 +23,7 @@ import { Button } from "./ui/button";
 import { useState } from "react";
 import { uploadImage } from "@/utils/uploadImage";
 import { useAddCorePackageMutation } from "@/redux/apiSlices/adminApiSlice";
+import ErrorComponent from "./ErrorComponent";
 
 const formSchema = z.object({
   name:  z.string().trim().min(1, { message: "Name cannot be empty" }).max(50, { message: "Name must be at most 50 characters." }).refine(value => !!value, { message: "Name cannot be empty." }), // Define image type schema
@@ -88,6 +89,7 @@ const AddCorePackage = ({ refetch }: { refetch: () => void }) => {
       };// Make a request to the backend with the form data
       const res:any=await addCorePackge (formDataWithImageUrl);
       // Reset the form after successful submission
+      
       if (res.error?.data) {
         
         if (res.error.data.message) {
@@ -108,10 +110,7 @@ const AddCorePackage = ({ refetch }: { refetch: () => void }) => {
       }
       
     } catch (error) {
-      console.error("Error submitting form:", error);
-      form.setError("root", {
-        message: "Error adding Core Package"
-      });
+      return <ErrorComponent/>
     }
   };
 

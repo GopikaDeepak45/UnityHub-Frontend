@@ -11,22 +11,18 @@ import HomePage from './pages/HomePage'
 const AppRoutes = () => {
   //select type of user using useAuth custom 
   const { role } = useAuth()
-  
-  console.log('roleee', role)
 
   return (
     <>
-<Routes>
-<Route path='/' element={<MainLayout><HomePage /></MainLayout>} />
+      <Routes>
+        <Route path='/' element={<MainLayout><HomePage /></MainLayout>} />
+      </Routes>
 
-</Routes>
+      {role === 'admin' && <AdminRoutes />}
 
-        {role === 'admin' && <AdminRoutes/>}
-         
-        {role === 'commAdmin' && <CommunityAdminRoutes/>}
-        
+      {role === 'commAdmin' && <CommunityAdminRoutes />}
 
-          {!role && <PublicRoutes />}
+      {!role && <PublicRoutes />}
     </>
   )
 }

@@ -1,6 +1,7 @@
 // utils/uploadImage.ts
 
 export const uploadImage = async (file: File): Promise<{ url: string, publicId: string } | null> => {
+  console.log('upload image rendered')
     try {
         console.log('upload img called')
       const formData = new FormData();

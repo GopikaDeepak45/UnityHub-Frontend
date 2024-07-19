@@ -8,6 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import pic1 from "../../assets/pic1.png";
+import handsPic from '../../assets/hands.png'
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -32,10 +33,12 @@ import MyCard from "@/components/MyCard";
 import { useForm } from "react-hook-form";
 import { useAddImageMutation, useDeleteImageMutation } from "@/redux/apiSlices/adminApiSlice";
 import { uploadImage } from "@/utils/uploadImage";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useGetLandingPageQuery } from "@/redux/apiSlices/landingPageSlice";
 import CustomAlertButton from "@/components/CustomAlert";
 import Overlay from "@/components/OverLay";
+import ErrorComponent from "@/components/ErrorComponent";
+import ProgressDemo from "@/components/ProgressDemo";
 
 const formSchema = z.object({
   imageType: z.enum(['hero', 'about', 'common']), // Define image type schema
@@ -47,7 +50,7 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 const AdminImages = () => {
-
+console.log('Admin Images page rendred')
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -57,31 +60,25 @@ const AdminImages = () => {
     },
   });
   //****************api hooks************
-  const { data: landingPageData, error: landingPageError, isLoading: landingPageLoading,refetch } = useGetLandingPageQuery(undefined);
+  const { data: landingPageData, error, isLoading,refetch } = useGetLandingPageQuery(undefined);
+  
+  if (isLoading) return  <ProgressDemo isLoading={isLoading} />;
+  if (error) return <ErrorComponent />;
 
   const [addImage] = useAddImageMutation()
   const [deleteImage] = useDeleteImageMutation()
 
-  
-  
-  const [loading, setLoading] = useState(true);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   //for overlay all images
   const [showOverlay, setShowOverlay] = useState(false);
   //for add image modal
-  const [showAddImageModal, setShowAddImageModal] = useState(true);
+  const [showAddImageModal, setShowAddImageModal] = useState(false);
 
   const handleShowAddImageModal = () => {
     setShowAddImageModal(true);
   };
 
-  useEffect(() => {
-    // Update the state when landing page data is fetched successfully
-    if (!landingPageLoading && !landingPageError) {
-      setLoading(false);
-    }
-  }, [landingPageData, landingPageLoading, landingPageError]);
-
+  
   //to take file input
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -106,7 +103,11 @@ const AdminImages = () => {
   const onSubmit = async (values: FormData) => {
     try {
       if (!selectedFile) {
-        throw new Error('Please select an image');
+       
+        form.setError("root", {
+          message: "Select an Image"
+        });
+        return
       }
       
 
@@ -143,7 +144,7 @@ const AdminImages = () => {
       });
     }
   };
-
+ 
   if (!landingPageData) {
     return <>
     <div className="flex justify-center text-4xl">No data available...
@@ -236,12 +237,7 @@ const AdminImages = () => {
       </div>
     </>;
   }
-  if (landingPageError) {
-    return <div className=" flex  justify-center text-4xl ">Something went wrong!...</div>;
-  }
-  if (loading) {
-    return <div className=" flex  justify-center text-3xl">Loading...</div>;
-  }
+  
   return (
     <div className="ml-10">
       <h1 className="text-2xl font-semibold m-10">Images</h1>
@@ -333,7 +329,7 @@ const AdminImages = () => {
       </div>
 
       {/*Table contents */}
-      <Table className="mt-11">
+      <Table >
         <TableHeader>
           <TableRow>
             <TableHead className="w-[100px]">Sl No:</TableHead>
@@ -347,10 +343,11 @@ const AdminImages = () => {
             <TableCell className="font-medium">1</TableCell>
             <TableCell>Hero Image</TableCell>
             <TableCell>
-              <img src={landingPageData?.hero?.url || pic1} alt="" className="w-[200px]" />
+              <img src={landingPageData?.hero?.url || handsPic} alt="" className="w-[200px] mx-auto" />
             </TableCell>
+            {!landingPageData?.hero&&<TableCell>Default image</TableCell>}
             {landingPageData?.hero && (
-              <TableCell className="text-right">
+              <TableCell >
                 <CustomAlertButton
                   title="Are you absolutely sure?"
                   description="This action cannot be undone. This will permanently delete the image."
@@ -370,16 +367,17 @@ const AdminImages = () => {
             <TableCell className="font-medium">2</TableCell>
             <TableCell>About Image</TableCell>
             <TableCell>
-              <img src={landingPageData?.about?.image.url || pic1} alt="" className="w-[200px]" />
+              <img src={landingPageData?.about?.image.url || pic1} alt="" className="w-[200px] mx-auto" />
             </TableCell>
+            {!landingPageData?.about?.image&&<TableCell>Default image</TableCell>}
             {landingPageData?.about?.image && (
-              <TableCell className="text-right">
+              <TableCell >
                 <CustomAlertButton
                   title="Are you absolutely sure?"
                   description="This action cannot be undone. This will permanently delete the image."
                   cancelText="Cancel"
                   confirmText="Continue"
-                  onConfirm={() => deleteImageHandler('about', landingPageData?.about?.image,landingPageData?.about.publicId)}
+                  onConfirm={() => deleteImageHandler('about', landingPageData?.about?.image.url,landingPageData?.about.image.publicId)}
                 >
                   <Button className="bg-red-300 p-2 text-black ml-2 hover:bg-red-500">
                     Delete
@@ -399,7 +397,7 @@ const AdminImages = () => {
                       key={index}
                       src={image.url}
                       alt={`Common Image ${index + 1}`}
-                      className="w-[200px] mr-2"
+                      className="w-[200px] p-2 mx-auto"
                     />
                   ))}
                   {/* Check if there are more than three images */}
@@ -409,7 +407,7 @@ const AdminImages = () => {
                 </>
               )}
             </TableCell>
-            <TableCell className="text-right">
+            <TableCell >
               <Button variant={"bg1"} onClick={() => setShowOverlay(true)}>See All</Button>
               {showOverlay && (
                 <Overlay onClose={() => setShowOverlay(false)}>

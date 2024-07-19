@@ -58,7 +58,7 @@ const formSchema = z.object({
           "Password must include at least one digit, one special character, and one uppercase letter.",
       }
     ),
-  mobileNo: z.string().trim().min(1, { message: " Cannot be empty" }).max(10, { message: "Mobile number must be a 10-digit number." }),
+  mobileNo: z.string().trim().min(1, { message: " Cannot be empty" }).max(10, { message: "Mobile number must be a 10-digit number." }).length(10, { message: "Mobile number must be exactly 10 digits." }).refine(value => /^[0-9]+$/.test(value), { message: "Mobile number must contain only digits." }),
   communityName: z.string().trim().min(1, { message: "Community Name cannot be empty" }).max(50, { message: "Community name must be at most 50 characters." }).refine(value => !!value, { message: "Community name cannot be empty." }),
   communityLocation: z.string().trim().min(1, { message: "Community location cannot be empty" }).max(50, { message: "Community location must be at most 50 characters." }).refine(value => !!value, { message: "Community location cannot be empty." }),
 });
@@ -88,7 +88,7 @@ const CommAdminRegistration: React.FC = () => {
 
   useEffect(() => {
     if (username) {
-     navigate('/api/commadamin')
+     navigate('/commadamin')
     }
   }, []);
 
@@ -123,12 +123,12 @@ const CommAdminRegistration: React.FC = () => {
   };
 
   return (
-    <div className="flex justify-center items-center">
+    <div className="w-1/3 mx-auto ">
      {otpPageVisible&&commAdminId ? (
       // Render the OTP page
-      <OtpComponent  commAdminId={commAdminId} />
+      <OtpComponent  id={commAdminId} role='comm-admin' />
     ) : (
-      <MyCard title="Register" description="" footer="">
+      <MyCard title="Community  Registration" description="" footer="">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           {form.formState.errors.root && (
@@ -143,7 +143,7 @@ const CommAdminRegistration: React.FC = () => {
             name="name" // Add field for name
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Name</FormLabel>
+                <FormLabel>Full Name</FormLabel>
                 <FormControl>
                   <Input placeholder="Your Name" {...field} />
                 </FormControl>

@@ -62,13 +62,18 @@ export function Nav({ links, isCollapsed }: NavProps) {
             <Link
               key={index}
               to={link.route} // Use the route specified in the link
-              className={cn(
-                buttonVariants({ variant: link.route===location.pathname?"default":"ghost", size: "sm" }),
+              className={cn( 
+                buttonVariants({ variant: link.route===location.pathname?"default":"ghost", size: "sm" }), "flex justify-between ",
                 
               )}
             >
-              <link.icon className="mr-2 h-4 w-4" />
-              {link.title}
+              {/* <link.icon className="mr-2 h-4 w-4" />
+              {link.title} */}
+              
+    <link.icon className="mr-2 h-4 w-4" />
+    {link.title}
+   
+
               {/* {link.label && (
                 // <span
                 //   className={cn(

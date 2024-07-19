@@ -67,7 +67,7 @@ const CommAdminLogin:React.FC = () => {
    useEffect(() => {
     if (role==='commAdmin') {
       
-       navigate("/api/comm-admin");
+       navigate("/comm-admin");
      }
   }, []);
 
@@ -100,7 +100,7 @@ const CommAdminLogin:React.FC = () => {
       const{accessToken}=res
       dispatch(setCredentials({ accessToken }))
             
-      navigate("/api/comm-admin");
+      navigate("/comm-admin");
       }
     } catch (e) {
       console.log('errorrr',e)

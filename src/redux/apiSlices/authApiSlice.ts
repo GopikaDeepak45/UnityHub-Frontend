@@ -4,9 +4,9 @@ import { logOut, setCredentials } from "../slices/authSlice"
 
 
 export const authApiSlice = apiSlice.injectEndpoints({
-    endpoints: builder => ({
+    endpoints: (builder: { mutation: (arg0: { query: ((credentials: any) => { url: string; method: string; body: any }) | (() => { url: string; method: string }) | (() => { url: string; method: string }); onQueryStarted?: ((_arg: any, { dispatch, queryFulfilled }: { dispatch: any; queryFulfilled: any }) => Promise<void>) | ((_arg: any, { dispatch, queryFulfilled }: { dispatch: any; queryFulfilled: any }) => Promise<void>) }) => any }) => ({
         login: builder.mutation({
-            query: credentials => ({
+            query: (credentials: any) => ({
                 url: '/auth/login',
                 method: 'POST',
                 body: { ...credentials }
@@ -17,7 +17,7 @@ export const authApiSlice = apiSlice.injectEndpoints({
                 url: '/auth/logout',
                 method: 'POST',
             }),
-            async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+            async onQueryStarted(_arg: any, { dispatch, queryFulfilled }: any) {
                 try {
                     const { data } = await queryFulfilled
                     console.log(data)
@@ -35,7 +35,7 @@ export const authApiSlice = apiSlice.injectEndpoints({
                 url: '/auth/refresh',
                 method: 'GET',
             }),
-            async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+            async onQueryStarted(_arg: any, { dispatch, queryFulfilled }: any) {
                 try {
                     const { data } = await queryFulfilled
                     console.log(data)

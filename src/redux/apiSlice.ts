@@ -38,8 +38,7 @@ FetchBaseQueryError
 
     let result = await baseQuery(args, api, extraOptions)
 
-    // If you want, handle other status codes, too
-    if (result?.error?.status === 403) {
+       if (result?.error?.status === 403) {
         console.log('sending refresh token')
 
         // send refresh token to get new access token 
@@ -69,7 +68,7 @@ FetchBaseQueryError
     return result
 }
 
-export const apiSlice = createApi({
+export const apiSlice:any = createApi({
     baseQuery: baseQueryWithReauth,
     endpoints: _builder => ({})
 })

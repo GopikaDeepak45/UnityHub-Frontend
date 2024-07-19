@@ -21,7 +21,7 @@ interface LinkData {
   }
   
   const Sidebar = ({ linksData }: Props) => {
-  const navigate = useNavigate();
+    const navigate = useNavigate();
   const dispatch=useDispatch()
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [sendLogout]=useSendLogoutMutation()
@@ -79,10 +79,12 @@ interface LinkData {
         links={linksData}
        
       />
-
-      <Button className=" text-black bg-secondary hover:bg-slate-200 mx-auto" onClick={logOutHandler}>
-       <Link to='/'>Logout</Link>
+<div className="flex justify-around ">
+<Button className=" text-black bg-secondary   fixed bottom-1 mb-10 hover:bg-black hover:text-white" onClick={logOutHandler}>
+       <Link to='/'  >Logout</Link>
       </Button>
+</div>
+      
     </div>
   );
 };

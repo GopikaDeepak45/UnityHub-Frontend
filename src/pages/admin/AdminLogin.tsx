@@ -67,7 +67,7 @@ const AdminLogin:React.FC = () => {
    useEffect(() => {
     if (role==='admin') {
       
-       navigate("/api/admin");
+       navigate("/admin");
      }
   }, []);
 
@@ -77,7 +77,7 @@ const AdminLogin:React.FC = () => {
       const { accessToken } = await login({  email:values.email, password:values.password,role:'admin'}).unwrap()
             dispatch(setCredentials({ accessToken }))
             
-      navigate("/api/admin");
+      navigate("/admin");
     } catch (e) {
       form.setError("root", {
         message: "Incorrect email or password",

@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import {
-  AlertDialog,
+
   AlertDialogCancel,
   AlertDialogContent,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,15 +17,16 @@ import { useEditCorePackageMutation } from '@/redux/apiSlices/adminApiSlice';
 
 const formSchema = z.object({
   id: z.string().optional(),
-  name: z.string().min(1, "Package name is required"),
-  imageUrl: z.string().optional(),
-  publicId: z.string().optional(),
-  shortDescription: z.string().min(1, "Description is required"),
+  name:  z.string().trim().min(1, { message: "Name cannot be empty" }).max(50, { message: "Name must be at most 50 characters." }).refine(value => !!value, { message: "Name cannot be empty." }), // Define image type schema
+  imageUrl: z.string(),
+  publicId:z.string(), // Validate that imageUrl is a valid URL
+  shortDescription: z.string().trim().min(1, { message: "Name cannot be empty" }).max(100, { message: "Name must be at most 100 characters." }).refine(value => !!value, { message: "Description cannot be empty." }),
 });
 
 type FormData = z.infer<typeof formSchema>;
 
-const EditCorePackage = ({ refetch, packageData }: { refetch: () => void, packageData: any }) => {
+const EditCorePackage = ({ refetch, packageData, setShowEditModal }: { refetch: () => void, setShowEditModal: (show: boolean) => void, packageData: any }) => {
+  console.log('item is', packageData)
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -41,14 +41,8 @@ const EditCorePackage = ({ refetch, packageData }: { refetch: () => void, packag
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [editCorePackage] = useEditCorePackageMutation();
-  const [showAddModal, setShowAddModal] = useState(true);
   const [image] = useState(packageData.image.url)
 
-
-  //to manage modal display
-  const handleShowAddModal = () => {
-    setShowAddModal(true);
-  };
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files && files.length > 0) {
@@ -82,9 +76,10 @@ const EditCorePackage = ({ refetch, packageData }: { refetch: () => void, packag
       if (res.error?.data?.message) {
         form.setError("root", { message: res.error.data.message });
       } else {
-        refetch();
-        setShowAddModal(false)
         form.reset();
+        refetch();
+        setShowEditModal(false)
+
       }
     } catch (error) {
       form.setError("root", { message: "Error editing Core Package" });
@@ -92,93 +87,85 @@ const EditCorePackage = ({ refetch, packageData }: { refetch: () => void, packag
   };
 
   return (
+    <AlertDialogContent>
+      <MyCard title="" description="" footer="">
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-8"
+          >
+            {form.formState.errors.root && (
+              <FormItem>
+                <FormLabel className="text-destructive">
+                  {form.formState.errors.root.message}
+                </FormLabel>
+              </FormItem>
+            )}
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Package Name</FormLabel>
+                  <FormControl>
+                    <Input  {...field} />
 
-    <AlertDialog>
-      <AlertDialogTrigger onClick={handleShowAddModal}><Button className="bg-green-500 p-4 text-black ml-2 hover:bg-green-700">
-        Edit
-      </Button></AlertDialogTrigger>
-      {showAddModal && (
-        <AlertDialogContent>
-          <MyCard title="" description="" footer="">
-            <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-8"
+                  </FormControl>
+
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <img src={image} className="w-[200px]" />
+
+            <FormField
+              control={form.control}
+              name="imageUrl"
+              render={() => (
+                <FormItem>
+                  <FormLabel>Choose Another Image</FormLabel>
+                  <FormControl>
+                    <Input type="file" onChange={handleFileChange} accept="image/*" />
+                  </FormControl>
+
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="shortDescription"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Input type="text" {...field} />
+
+                  </FormControl>
+
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="flex justify-around">
+              {!form.formState.isSubmitting && (
+                <AlertDialogCancel onClick={() => setShowEditModal(false)}>Cancel</AlertDialogCancel>
+              )}
+              <Button
+                type="submit"
+                disabled={form.formState.isSubmitting}
+                variant={"bg1"}
               >
-                {form.formState.errors.root && (
-                  <FormItem>
-                    <FormLabel className="text-destructive">
-                      {form.formState.errors.root.message}
-                    </FormLabel>
-                  </FormItem>
-                )}
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Package Name</FormLabel>
-                      <FormControl>
-                        <Input  {...field} />
-
-                      </FormControl>
-
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <img src={image} className="w-[200px]" />
-
-                <FormField
-                  control={form.control}
-                  name="imageUrl"
-                  render={() => (
-                    <FormItem>
-                      <FormLabel>Choose Another Image</FormLabel>
-                      <FormControl>
-                        <Input type="file" onChange={handleFileChange} accept="image/*" />
-                      </FormControl>
-
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="shortDescription"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Description</FormLabel>
-                      <FormControl>
-                        <Input type="text" {...field} />
-
-                      </FormControl>
-
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="flex justify-around">
-                  {!form.formState.isSubmitting && (
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  )}
-                  <Button
-                    type="submit"
-                    disabled={form.formState.isSubmitting}
-                    variant={"bg1"}
-                  >
-                    {form.formState.isSubmitting
-                      ? "Loading..."
-                      : "Submit"}
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          </MyCard>
-        </AlertDialogContent>
-      )}
-    </AlertDialog>
+                {form.formState.isSubmitting
+                  ? "Loading..."
+                  : "Submit"}
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </MyCard>
+    </AlertDialogContent>
   );
 };
 
